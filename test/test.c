@@ -13,5 +13,5 @@ int main(void)
     else
         printf("Did not compile source code.\n");
 
-    return (int)Compile(string);
+    return 0;
 }
