@@ -3,6 +3,8 @@
  * intermediate source for code generation.
  */
 
+#include "stdio.h"
+
 #include "pilot.h"
 
 int IsDelimiter(char Character);
@@ -25,7 +27,7 @@ char* Compile(char* Source)
         }
         else if (IsDelimiter(Character))
         {
-            // TODO
+            printf("DELIM\t\"%c\"\n", Character);
         }
         else
         {
@@ -37,12 +39,24 @@ char* Compile(char* Source)
 }
 
 
-int IsDelimiter(char Character)
+int IsWhitespace(char Character)
 {
+    char* WhitespaceCharacters = " \t\r\n\0";
+
+    for (char WhitespaceCharacter = *WhitespaceCharacters;
+         WhitespaceCharacter != '\0';
+         WhitespaceCharacter = *(++WhitespaceCharacters))
+    {
+        if (Character == WhitespaceCharacter)
+        {
+            return 1;
+        }
+    }
+
     return 0;
 }
 
-int IsWhitespace(char Character)
+int IsDelimiter(char Character)
 {
-    return 0;
+    return Character == '(' || Character == ')';
 }
