@@ -5,6 +5,6 @@
 clang `
     -I includes `
     -o .\bin\test.exe `
-    .\test\test.c .\lib\libpilot.lib
+    .\test\test.c .\lib\pilot.lib
 
 .\bin\test.exe

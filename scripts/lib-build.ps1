@@ -11,13 +11,13 @@ if (-Not (Test-Path .\lib)) {
 # Shared library build
 clang -shared `
     -I includes `
-    -o .\lib\libpilot.dll `
-    .\src\libpilot.c
+    -o .\lib\pilot.dll `
+    .\src\pilot.c
 
 # Static library build
 clang -c `
     -I includes `
-    -o .\bin\libpilot.o `
-    .\src\libpilot.c
+    -o .\bin\pilot.o `
+    .\src\pilot.c
 
-llvm-ar -rc .\lib\libpilot.lib .\bin\libpilot.o
+llvm-ar -rc .\lib\pilot.lib .\bin\pilot.o

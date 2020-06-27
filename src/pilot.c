@@ -3,7 +3,7 @@
  * intermediate source for code generation.
  */
 
-#include "libpilot.h"
+#include "pilot.h"
 
 int IsDelimiter(char Character);
 int IsWhitespace(char Character);

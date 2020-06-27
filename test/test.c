@@ -1,7 +1,7 @@
 
 #include "stdio.h"
 
-#include "libpilot.h"
+#include "pilot.h"
 
 int main(void)
 {
