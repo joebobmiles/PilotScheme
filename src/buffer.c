@@ -54,6 +54,7 @@ BUFFERS
 
 #undef BUFFER
 #undef APPEND
+#undef FREE
 #undef MAKE_BUFFER
 #undef BUFFERS
 
