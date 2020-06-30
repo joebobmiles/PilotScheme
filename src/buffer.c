@@ -29,16 +29,29 @@
         return ++Buffer->Length; \
     }
 
+/*
+TODO: We can save on allocations by only resetting length and providing a
+Copy*Buffer() function that simply returns a freshly 'alloc'd pointer of the
+Buffer type. This would allow us to overwrite the existing buffer without having
+to allocate memory for it on the first Append*() operation.
+ */
+#define RESET(N, T) \
+    void Reset ## N ## Buffer(T ## _buffer* Buffer) { \
+        Buffer->Data = NULL; \
+        Buffer->Length = 0; \
+        Buffer->Size = 0; \
+    }
+
 #define FREE(N, T) \
     void Free ## N ## Buffer(T ## _buffer* Buffer) { \
         free(Buffer->Data); \
-        Buffer->Size = 0; \
-        Buffer->Length = 0; \
+        Reset ## N ## Buffer(Buffer); \
     }
 
 #define MAKE_BUFFER(N, T) \
     BUFFER(T) \
     APPEND(N, T) \
+    RESET(N, T) \
     FREE(N, T)
 
 
@@ -54,6 +67,7 @@ BUFFERS
 
 #undef BUFFER
 #undef APPEND
+#undef RESET
 #undef FREE
 #undef MAKE_BUFFER
 #undef BUFFERS
