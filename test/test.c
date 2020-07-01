@@ -5,13 +5,16 @@
 
 int main(void)
 {
-    char* string = "()";
+    char* String = "()";
 
-    if ((int)Compile(string))
-        printf("Compiled source code.\n");
+    token* Tokens = Tokenize(String);
 
-    else
-        printf("Did not compile source code.\n");
+    for (token Token = *Tokens;
+         Token.Value != 0;
+         Token = *(++Tokens))
+    {
+        printf("%s\n", Token.Value);
+    }
 
     return 0;
 }

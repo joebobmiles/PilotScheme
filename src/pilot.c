@@ -3,19 +3,44 @@
  * intermediate source for code generation.
  */
 
+#include "stdlib.h"
 #include "stdio.h"
 
 #include "pilot.h"
 
-int IsDelimiter(char Character);
+#include "buffer.c"
+
 int IsWhitespace(char Character);
+
+int IsListStart(char Character);
+int IsListEnd(char Character);
+int IsDelimiter(char Character);
 
 /**
  * @param   Source  A null-terminated c-string of Pilot Scheme source code.
  * @return  A null-terminated c-string of intermediate source.
  */
-char* Compile(char* Source)
+token* Tokenize(const char* Source)
 {
+    char_buffer Buffer = (char_buffer)
+    {
+        .Data = NULL,
+        .Length = 0,
+        .Size = 0,
+    };
+
+    token_buffer Tokens = (token_buffer)
+    {
+        .Data = NULL,
+        .Length = 0,
+        .Size = 0,
+    };
+
+    token CurrentToken = (token)
+    {
+        .Value = NULL,
+        .Type = NONE,
+    };
 
     for (char Character = *Source;
          Character != '\0';
@@ -23,19 +48,50 @@ char* Compile(char* Source)
     {
         if (IsWhitespace(Character))
         {
-            continue;
+            if (Buffer.Length > 0)
+            {
+                CurrentToken.Value = CopyCharBuffer(&Buffer);
+                CurrentToken.Type = NAME;
+
+                AppendToken(&Tokens, CurrentToken);
+
+                ResetCharBuffer(&Buffer);
+            }
         }
         else if (IsDelimiter(Character))
         {
-            printf("DELIM\t\"%c\"\n", Character);
+            if (Buffer.Length > 0)
+            {
+                CurrentToken.Value = CopyCharBuffer(&Buffer);
+                CurrentToken.Type = NAME;
+
+                AppendToken(&Tokens, CurrentToken);
+
+                ResetCharBuffer(&Buffer);
+            }
+
+            AppendChar(&Buffer, Character);
+            CurrentToken.Value = Buffer.Data;
+
+            // TODO: Remove IsDelimiter check?
+            if (IsListStart(Character))
+                CurrentToken.Type = LIST_START; 
+            else
+                CurrentToken.Type = LIST_END;
+
+            AppendToken(&Tokens, CurrentToken);
+
+            ResetCharBuffer(&Buffer);
         }
         else
         {
-            // TODO
+            AppendChar(&Buffer, Character);
         }
     }
 
-    return 0;
+    FreeCharBuffer(&Buffer);
+
+    return CopyTokenBuffer(&Tokens);
 }
 
 
@@ -58,5 +114,8 @@ int IsWhitespace(char Character)
 
 int IsDelimiter(char Character)
 {
-    return Character == '(' || Character == ')';
+    return IsListStart(Character) || IsListEnd(Character);
 }
+
+int IsListStart(char Character) { return Character == '('; }
+int IsListEnd(char Character) { return Character == ')'; }
