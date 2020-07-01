@@ -2,6 +2,7 @@
 #define BUFFER_H
 
 #include "stdlib.h"
+#include "string.h"
 
 #include "pilot.h"
 
@@ -29,6 +30,14 @@
         return ++Buffer->Length; \
     }
 
+#define COPY(N, T) \
+    T* Copy ## N ## Buffer(T ## _buffer* Buffer) { \
+        T* Copy = (T*)malloc(sizeof(T) * Buffer->Length); \
+        memcpy(Copy, Buffer->Data, sizeof(T) * Buffer->Length); \
+        Copy[Buffer->Length] = (T) { 0 }; \
+        return Copy; \
+    }
+
 /*
 TODO: We can save on allocations by only resetting length and providing a
 Copy*Buffer() function that simply returns a freshly 'alloc'd pointer of the
@@ -51,6 +60,7 @@ to allocate memory for it on the first Append*() operation.
 #define MAKE_BUFFER(N, T) \
     BUFFER(T) \
     APPEND(N, T) \
+    COPY(N, T) \
     RESET(N, T) \
     FREE(N, T)
 
