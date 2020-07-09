@@ -2,10 +2,14 @@
 
 .\scripts\lib-build.ps1
 
-clang `
-    -std=c99 `
-    -I includes `
-    -o .\bin\test.exe `
-    .\test\test.c .\lib\pilot.lib
+Push-Location .\bin
 
-.\bin\test.exe
+clang-cl /Zi `
+    /std:c99 `
+    /I ..\includes `
+    /o .\test.exe `
+    ..\test\test.c ..\lib\pilot.lib
+
+# .\test.exe
+
+Pop-Location

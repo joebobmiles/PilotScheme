@@ -8,18 +8,29 @@ if (-Not (Test-Path .\lib)) {
     md .\lib | Out-Null
 }
 
+Push-Location .\lib
+
 # Shared library build
-clang -shared `
-    -std=c99 `
-    -I includes `
-    -o .\lib\pilot.dll `
-    .\src\pilot.c
+# Using /LDd (debug DLL) instead of /LD (release DLL)
+clang-cl /Zi /LDd `
+    /I ..\includes `
+    /o .\pilot.dll `
+    ..\src\pilot.c
+
+Pop-Location
+
+Push-Location .\bin
 
 # Static library build
-clang -c `
-    -std=c99 `
-    -I includes `
-    -o .\bin\pilot.o `
-    .\src\pilot.c
+clang-cl /Zi /c `
+    /I ..\includes `
+    /o .\pilot.o `
+    ..\src\pilot.c
 
-llvm-ar -rc .\lib\pilot.lib .\bin\pilot.o
+Pop-Location
+
+Push-Location .\lib
+
+llvm-ar -rc .\pilot.lib ..\bin\pilot.o
+
+Pop-Location
