@@ -24,8 +24,14 @@ typedef struct {
     } Type;
 } token;
 
+typedef struct {
+    const char* Cursor;
+} token_stream;
+
 // Pass null-terminated c-string containing Pilot Scheme source code.
 // Receive back null-terminated array of tokens.
-token* Tokenize(const char*);
+token* Tokenize(const char* Source);
+
+token NextToken(token_stream* Tokenizer);
 
 #endif
