@@ -47,7 +47,6 @@ to allocate memory for it on the first Append*() operation.
 #define RESET(N, T) \
     void Reset ## N ## Buffer(T ## _buffer* Buffer) { \
         Buffer->Length = 0; \
-        Buffer->Size = 0; \
     }
 
 #define FREE(N, T) \

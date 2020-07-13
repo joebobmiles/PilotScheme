@@ -14,7 +14,6 @@ static int IsWhitespace(char Character);
 
 static inline int IsListStart(char Character);
 static inline int IsListEnd(char Character);
-static inline int IsDelimiter(char Character);
 
 /**
  * @param   Source  A null-terminated c-string of Pilot Scheme source code.
@@ -58,7 +57,7 @@ token* Tokenize(const char* Source)
                 ResetCharBuffer(&Buffer);
             }
         }
-        else if (IsDelimiter(Character))
+        else if (IsListStart(Character) || IsListEnd(Character))
         {
             if (Buffer.Length > 0)
             {
@@ -73,7 +72,6 @@ token* Tokenize(const char* Source)
             AppendChar(&Buffer, Character);
             CurrentToken.Value = Buffer.Data;
 
-            // TODO: Remove IsDelimiter check?
             if (IsListStart(Character))
                 CurrentToken.Type = LIST_START; 
             else
@@ -122,7 +120,7 @@ token NextToken(token_stream* Tokenizer)
 
             Tokenizer->Cursor++;
         }
-        else if (IsDelimiter(Character))
+        else if (IsListStart(Character) || IsListEnd(Character))
         {
             if (Buffer.Length > 0)
             {
@@ -135,7 +133,6 @@ token NextToken(token_stream* Tokenizer)
             AppendChar(&Buffer, Character);
             CurrentToken.Value = CopyCharBuffer(&Buffer);
 
-            // TODO: Remove IsDelimiter check?
             if (IsListStart(Character))
                 CurrentToken.Type = LIST_START; 
             else
@@ -172,11 +169,6 @@ int IsWhitespace(char Character)
     }
 
     return 0;
-}
-
-int IsDelimiter(char Character)
-{
-    return IsListStart(Character) || IsListEnd(Character);
 }
 
 int IsListStart(char Character) { return Character == '('; }
