@@ -10,11 +10,11 @@
 
 #include "buffer.c"
 
-int IsWhitespace(char Character);
+static int IsWhitespace(char Character);
 
-int IsListStart(char Character);
-int IsListEnd(char Character);
-int IsDelimiter(char Character);
+static inline int IsListStart(char Character);
+static inline int IsListEnd(char Character);
+static inline int IsDelimiter(char Character);
 
 /**
  * @param   Source  A null-terminated c-string of Pilot Scheme source code.
