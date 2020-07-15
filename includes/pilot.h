@@ -9,10 +9,23 @@
  */
 
 typedef struct {
-    char* Value;
+     char* buffer;
+     unsigned int buffer_length;
+     unsigned int buffer_size;
+     unsigned int cursor_offset; // Offset into buffer
+} plt_lexer;
+
+typedef struct {
+    char* arena;
+    char* arena_cursor;
+    size_t arena_length;
+} plt_compiler;
+
+typedef struct {
+    const char* text;
 
     #define TOKEN_TYPES \
-        _(NONE) \
+        _(INVALID) \
         _(LIST_START) \
         _(LIST_END) \
         _(NAME)
@@ -21,17 +34,10 @@ typedef struct {
         #define _(T) T,
         TOKEN_TYPES
         #undef _
-    } Type;
-} token;
+    } type;
+} plt_token;
 
-typedef struct {
-    const char* Cursor;
-} token_stream;
-
-// Pass null-terminated c-string containing Pilot Scheme source code.
-// Receive back null-terminated array of tokens.
-token* Tokenize(const char* Source);
-
-token NextToken(token_stream* Tokenizer);
+plt_token
+plt_next_token(plt_compiler*, plt_lexer*, const char*, const int);
 
 #endif

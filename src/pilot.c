@@ -8,91 +8,140 @@
 
 #include "pilot.h"
 
-#include "buffer.c"
+// #include "buffer.c"
 
-static int IsWhitespace(char Character);
-
-static inline int IsListStart(char Character);
-static inline int IsListEnd(char Character);
-
-token NextToken(token_stream* Tokenizer)
+// TODO(jrm): convert to branchless?
+static int
+is_whitespace(char character)
 {
-    // NOTE: Tokenizer could carry the Buffer around, releasing us from having
-    // to perform redundant memory operations.
-    // An alternative would be to make the Buffer static, so that it persists
-    // between NextToken() calls without having to be part of Tokenizer. The
-    // only problem with doing that would be that there would be no-one to clean
-    // up Buffer when tokenization is done.
-    char_buffer Buffer = (char_buffer) { 0 };
+    char* whitespace_characters = " \t\r\n";
 
-    token CurrentToken = (token) { 0 };
-
-
-    char Character = '\0';
-    while ((Character = *(Tokenizer->Cursor)) != '\0')
+    for (char whitespace_character = *whitespace_characters;
+         whitespace_character != '\0';
+         whitespace_character = *(++whitespace_characters))
     {
-        if (IsWhitespace(Character))
-        {
-            if (Buffer.Length > 0)
-            {
-                CurrentToken.Value = CopyCharBuffer(&Buffer);
-                CurrentToken.Type = NAME;
-
-                break;
-            }
-
-            Tokenizer->Cursor++;
-        }
-        else if (IsListStart(Character) || IsListEnd(Character))
-        {
-            if (Buffer.Length > 0)
-            {
-                CurrentToken.Value = CopyCharBuffer(&Buffer);
-                CurrentToken.Type = NAME;
-
-                break;
-            }
-
-            AppendChar(&Buffer, Character);
-            CurrentToken.Value = CopyCharBuffer(&Buffer);
-
-            if (IsListStart(Character))
-                CurrentToken.Type = LIST_START; 
-            else
-                CurrentToken.Type = LIST_END;
-
-            Tokenizer->Cursor++;
-            break;
-        }
-        else
-        {
-            AppendChar(&Buffer, Character);
-            Tokenizer->Cursor++;
-        }
-    }
-
-    FreeCharBuffer(&Buffer);
-
-    return CurrentToken;
-}
-
-
-int IsWhitespace(char Character)
-{
-    char* WhitespaceCharacters = " \t\r\n\0";
-
-    for (char WhitespaceCharacter = *WhitespaceCharacters;
-         WhitespaceCharacter != '\0';
-         WhitespaceCharacter = *(++WhitespaceCharacters))
-    {
-        if (Character == WhitespaceCharacter)
-        {
-            return 1;
-        }
+        if (character == whitespace_character) return 1;
     }
 
     return 0;
 }
 
-int IsListStart(char Character) { return Character == '('; }
-int IsListEnd(char Character) { return Character == ')'; }
+static inline int
+is_list_start(char character) { return character == '('; }
+
+static inline int
+is_list_end(char character) { return character == ')'; }
+
+//! HACK(jrm): Dumb allocator doing dumb things!
+static char*
+allocate(plt_compiler* compiler, size_t requested_size)
+{
+    const size_t used_length = compiler->arena_cursor - compiler->arena;
+
+    if (compiler->arena_length - used_length < requested_size)
+    {
+        return 0;
+    }
+
+    void* address = compiler->arena_cursor;
+    compiler->arena_cursor += requested_size;
+
+    return address;
+}
+
+static int
+copy(char* source, size_t source_size, char* destination)
+{
+    for (size_t i = 0; i < source_size; i++)
+        destination[i] = source[i];
+
+    return 0;
+}
+
+static int
+buffer_push(plt_compiler* compiler, plt_lexer* lexer, char c)
+{
+    if (lexer->buffer_size == 0)
+    {
+        lexer->buffer_size = 2;
+        lexer->buffer = allocate(compiler, sizeof(char) * lexer->buffer_size);
+    }
+    else if (lexer->buffer_length == lexer->buffer_size)
+    {
+        size_t old_buffer_size = lexer->buffer_size;
+        char* old_buffer = lexer->buffer;
+
+        lexer->buffer_size *= 2;
+        lexer->buffer = allocate(compiler, sizeof(char) * lexer->buffer_size);
+
+        copy(old_buffer, old_buffer_size, lexer->buffer);
+    }
+
+    lexer->buffer[lexer->buffer_length++] = c;
+    lexer->buffer[lexer->buffer_length] = '\0';
+
+    return lexer->buffer_length;
+}
+
+plt_token
+plt_next_token(
+    plt_compiler* compiler,
+    plt_lexer* lexer,
+    const char* source,
+    const int source_length)
+{
+    plt_token t;
+    t.text = 0;
+    t.type = 0;
+
+    while (lexer->cursor_offset < source_length)
+    {
+        char c = source[lexer->cursor_offset];
+
+        if (is_whitespace(c))
+        {
+            if (lexer->buffer_length > 0)
+            {
+                t.text = lexer->buffer;
+                t.type = NAME;
+
+                lexer->cursor_offset++;
+                break;
+            }
+        }
+        else if (is_list_start(c) || is_list_end(c))
+        {
+            if (lexer->buffer_length > 0)
+            {
+                t.text = lexer->buffer;
+                t.type = NAME;
+
+                break;
+            }
+
+            buffer_push(compiler, lexer, c);
+            t.text = lexer->buffer;
+
+            if (is_list_start(c))
+            {
+                t.type = LIST_START;
+            }
+            else
+            {
+                t.type = LIST_END;
+            }
+            
+            lexer->cursor_offset++;
+            break;
+        }
+        else
+        {
+            buffer_push(compiler, lexer, c);
+            lexer->cursor_offset++;
+        }
+    }
+
+    lexer->buffer_length = 0;
+
+    return t;
+}

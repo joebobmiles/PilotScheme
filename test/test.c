@@ -1,24 +1,43 @@
 
 #include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
 
 #include "pilot.h"
 
-int main(void)
+int
+main(void)
 {
-    const char* String = "(cons 1 2)";
+    const char* source = "(cons 1 2)\0";
 
-    token_stream Tokenizer = (token_stream)
-    {
-        .Cursor = String,
-    };
+    /// BEGIN compiler setup
+    const int max_arena_size = 1024 * 1024;
 
-    token Token;
-    while ((Token = NextToken(&Tokenizer)).Value != NULL)
-    {
+    plt_compiler compiler;
+    compiler.arena = malloc(max_arena_size);
+    compiler.arena_cursor = compiler.arena;
+    compiler.arena_length = max_arena_size;
+
+    plt_lexer lexer;
+    lexer.buffer = 0;
+    lexer.buffer_length = 0;
+    lexer.buffer_size = 0;
+    lexer.cursor_offset = 0;
+    /// END compiler setup
+    
+    plt_token t;
+    do {
+        t = plt_next_token(
+            &compiler,
+            &lexer,
+            source,
+            strlen(source));
+
+        // TODO(jrm)
         printf("%#010x\t%s\n",
-            (unsigned int)Token.Value,
-            Token.Value);
-    }
+            (unsigned int) t.text,
+            t.text);
+    } while(t.type != INVALID);
 
     return 0;
 }
