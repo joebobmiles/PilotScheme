@@ -39,9 +39,7 @@ allocate(plt_compiler* compiler, size_t requested_size)
     const size_t used_length = compiler->arena_cursor - compiler->arena;
 
     if (compiler->arena_length - used_length < requested_size)
-    {
         return 0;
-    }
 
     void* address = compiler->arena_cursor;
     compiler->arena_cursor += requested_size;
@@ -123,13 +121,9 @@ plt_next_token(
             t.text = lexer->buffer;
 
             if (is_list_start(c))
-            {
                 t.type = LIST_START;
-            }
             else
-            {
                 t.type = LIST_END;
-            }
             
             lexer->cursor_offset++;
             break;
