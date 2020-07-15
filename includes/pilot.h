@@ -20,12 +20,6 @@ typedef struct {
 } plt_lexer;
 
 typedef struct {
-    char* arena;
-    char* arena_cursor;
-    size_t arena_length;
-} plt_compiler;
-
-typedef struct {
     const char* text;
 
     #define TOKEN_TYPES \
