@@ -10,6 +10,22 @@
 
 // #include "buffer.c"
 
+
+/// GLOBAL VARS
+static char* arena = 0;
+static char* arena_cursor = 0;
+static size_t arena_length = 0;
+
+void
+plt_init(char* provided_arena, size_t max_size)
+{
+    arena = provided_arena;
+    arena_cursor = arena;
+    arena_length = max_size;
+}
+
+
+
 // TODO(jrm): convert to branchless?
 static int
 is_whitespace(char character)
@@ -34,15 +50,15 @@ is_list_end(char character) { return character == ')'; }
 
 //! HACK(jrm): Dumb allocator doing dumb things!
 static char*
-allocate(plt_compiler* compiler, size_t requested_size)
+allocate(size_t requested_size)
 {
-    const size_t used_length = compiler->arena_cursor - compiler->arena;
+    const size_t used_length = arena_cursor - arena;
 
-    if (compiler->arena_length - used_length < requested_size)
+    if (arena_length - used_length < requested_size)
         return 0;
 
-    void* address = compiler->arena_cursor;
-    compiler->arena_cursor += requested_size;
+    void* address = arena;
+    arena += requested_size;
 
     return address;
 }
@@ -57,12 +73,12 @@ copy(char* source, size_t source_size, char* destination)
 }
 
 static int
-buffer_push(plt_compiler* compiler, plt_lexer* lexer, char c)
+buffer_push(plt_lexer* lexer, char c)
 {
     if (lexer->buffer_size == 0)
     {
         lexer->buffer_size = 2;
-        lexer->buffer = allocate(compiler, sizeof(char) * lexer->buffer_size);
+        lexer->buffer = allocate(sizeof(char) * lexer->buffer_size);
     }
     else if (lexer->buffer_length == lexer->buffer_size)
     {
@@ -70,7 +86,7 @@ buffer_push(plt_compiler* compiler, plt_lexer* lexer, char c)
         char* old_buffer = lexer->buffer;
 
         lexer->buffer_size *= 2;
-        lexer->buffer = allocate(compiler, sizeof(char) * lexer->buffer_size);
+        lexer->buffer = allocate(sizeof(char) * lexer->buffer_size);
 
         copy(old_buffer, old_buffer_size, lexer->buffer);
     }
@@ -83,7 +99,6 @@ buffer_push(plt_compiler* compiler, plt_lexer* lexer, char c)
 
 plt_token
 plt_next_token(
-    plt_compiler* compiler,
     plt_lexer* lexer,
     const char* source,
     const int source_length)
@@ -117,7 +132,7 @@ plt_next_token(
                 break;
             }
 
-            buffer_push(compiler, lexer, c);
+            buffer_push(lexer, c);
             t.text = lexer->buffer;
 
             if (is_list_start(c))
@@ -130,7 +145,7 @@ plt_next_token(
         }
         else
         {
-            buffer_push(compiler, lexer, c);
+            buffer_push(lexer, c);
             lexer->cursor_offset++;
         }
     }

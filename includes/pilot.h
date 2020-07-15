@@ -8,6 +8,10 @@
  * interpreter.
  */
 
+void
+plt_init(char*, size_t);
+
+
 typedef struct {
      char* buffer;
      unsigned int buffer_length;
@@ -38,6 +42,6 @@ typedef struct {
 } plt_token;
 
 plt_token
-plt_next_token(plt_compiler*, plt_lexer*, const char*, const int);
+plt_next_token(plt_lexer*, const char*, const int);
 
 #endif

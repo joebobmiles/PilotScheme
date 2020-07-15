@@ -11,12 +11,10 @@ main(void)
     const char* source = "(cons 1 2)\0";
 
     /// BEGIN compiler setup
-    const int max_arena_size = 1024 * 1024;
+    const size_t max_arena_size = 1024 * 1024;
+    char* arena = malloc(max_arena_size);
 
-    plt_compiler compiler;
-    compiler.arena = malloc(max_arena_size);
-    compiler.arena_cursor = compiler.arena;
-    compiler.arena_length = max_arena_size;
+    plt_init(arena, max_arena_size);
 
     plt_lexer lexer;
     lexer.buffer = 0;
@@ -28,7 +26,6 @@ main(void)
     plt_token t;
     do {
         t = plt_next_token(
-            &compiler,
             &lexer,
             source,
             strlen(source));
@@ -38,6 +35,9 @@ main(void)
             (unsigned int) t.text,
             t.text);
     } while(t.type != INVALID);
+
+    /// Compiler teardown
+    free(arena);
 
     return 0;
 }
