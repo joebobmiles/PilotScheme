@@ -82,13 +82,12 @@ buffer_push(plt_lexer* lexer, char c)
     }
     else if (lexer->buffer_length == lexer->buffer_size)
     {
-        size_t old_buffer_size = lexer->buffer_size;
         char* old_buffer = lexer->buffer;
 
         lexer->buffer_size *= 2;
         lexer->buffer = allocate(sizeof(char) * lexer->buffer_size);
 
-        copy(old_buffer, old_buffer_size, lexer->buffer);
+        copy(old_buffer, lexer->buffer_length, lexer->buffer);
     }
 
     lexer->buffer[lexer->buffer_length++] = c;
