@@ -8,6 +8,22 @@
  * interpreter.
  */
 
+/// Define size_t, unless we're told not to.
+#ifdef PILOT_INFER_SIZE_T
+
+#if defined(__SIZE_TYPE__)
+typedef __SIZE_TYPE__ size_t;
+#elif defined(_WIN64)
+typedef unsigned long long int size_t;
+#elif defined(_WIN32)
+typedef unsigned long int size_t;
+#else
+#error Can't infer size_t! Please define size_t!
+#endif
+
+#endif // PILOT_NO_SIZE_T
+
+
 void
 plt_init(char*, size_t);
 
