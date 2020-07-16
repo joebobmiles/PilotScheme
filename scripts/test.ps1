@@ -1,5 +1,7 @@
 # This is the Windows test script
 
+if (Test-Path .\bin)
+
 Push-Location .\bin
 
 clang-cl /Zi `

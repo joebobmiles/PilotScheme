@@ -73,3 +73,6 @@ To test Pilot Scheme, run the appropriate `test.*` script for your platform in
 the `./scripts/` directory. This will build the tests and produce an executable
 in a `./bin/` directory. Running the executable will run all the prepared tests
 for Pilot Scheme.
+
+> Only Windows PowerShell is supported at this time. Contributions for build
+> scripts on other platforms are welcome!
