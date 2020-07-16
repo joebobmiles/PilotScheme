@@ -24,10 +24,10 @@ typedef unsigned long int size_t;
 #endif // PILOT_INFER_SIZE_T
 
 typedef struct {
-     char* buffer;
-     unsigned int buffer_length;
-     unsigned int buffer_size;
-     unsigned int cursor_offset; // Offset into buffer
+    char* buffer;
+    unsigned int buffer_length;
+    unsigned int buffer_size;
+    unsigned int cursor_offset; // Offset into buffer
 } plt_lexer;
 
 typedef struct {
