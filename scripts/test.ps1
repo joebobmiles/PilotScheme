@@ -1,6 +1,8 @@
 # This is the Windows test script
 
-if (Test-Path .\bin)
+if (-not (Test-Path .\bin)) {
+    md .\bin | Out-Null
+}
 
 Push-Location .\bin
 
