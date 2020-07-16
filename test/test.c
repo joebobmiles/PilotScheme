@@ -8,10 +8,10 @@
 int
 main(void)
 {
-    const char* source = "(cons 1 2)\0";
+    const char* source = "(cons 1 2)";
 
     /// BEGIN compiler setup
-    const size_t max_arena_size = 1024 * 1024;
+    const size_t max_arena_size = 1024;
     char* arena = malloc(max_arena_size);
 
     plt_init(arena, max_arena_size);
