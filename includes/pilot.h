@@ -8,20 +8,22 @@
  * interpreter.
  */
 
-/// Define size_t, unless we're told not to.
-#ifdef PILOT_INFER_SIZE_T
+// Define size_t, if the consumer asks us.
+#ifdef PILOT_DEFINE_SIZE_T
 
 #if defined(__SIZE_TYPE__)
-typedef __SIZE_TYPE__ size_t;
+typedef __SIZE_TYPE__ __pilot_size_t;
 #elif defined(_WIN64)
-typedef unsigned long long int size_t;
+typedef unsigned long long int __pilot_size_t;
 #elif defined(_WIN32)
-typedef unsigned long int size_t;
+typedef unsigned long int __pilot_size_t;
 #else
-#error Can't infer size_t! Please define size_t!
+#error Unable to define size_t!
 #endif
 
-#endif // PILOT_INFER_SIZE_T
+#define size_t __pilot_size_t
+
+#endif // PILOT_DEFINE_SIZE_T
 
 typedef struct {
     char* buffer;
@@ -270,5 +272,10 @@ plt_next_token(
 
     return t;
 }
+
+// Clean up size_t definition so we don't polute consumer's namespace.
+#ifdef PILOT_DEFINE_SIZE_T && size_t
+#undef size_t
+#endif
 
 #endif
