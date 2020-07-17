@@ -49,8 +49,8 @@ typedef struct {
 } plt_token;
 
 /// GLOBAL VARS
-static char* arena = 0;
-static char* arena_cursor = 0;
+static void* arena = 0;
+static void* arena_cursor = 0;
 static size_t arena_length = 0;
 
 /**
@@ -64,7 +64,7 @@ static size_t arena_length = 0;
  * @param   max_size        There's no way in hell we're relying on sentinels.
  */
 void
-plt_init(char* provided_arena, size_t max_size)
+plt_init(void* provided_arena, size_t max_size)
 {
     arena = provided_arena;
     arena_cursor = arena;
@@ -83,16 +83,16 @@ plt_init(char* provided_arena, size_t max_size)
  * @param   requested_size  How big do you want it?
  * @return  The start address of the freshly allocated memory.
  */
-static char*
+static void*
 allocate(size_t requested_size)
 {
-    const size_t used_length = arena_cursor - arena;
+    const size_t used_length = (size_t)arena_cursor - (size_t)arena;
 
     if (arena_length - used_length < requested_size)
         return 0;
 
-    void* address = arena;
-    arena += requested_size;
+    void* address = arena_cursor;
+    arena_cursor = (void*) ((size_t)arena_cursor + requested_size);
 
     return address;
 }
@@ -274,7 +274,7 @@ plt_next_token(
 }
 
 // Clean up size_t definition so we don't polute consumer's namespace.
-#ifdef PILOT_DEFINE_SIZE_T && size_t
+#if defined(PILOT_DEFINE_SIZE_T) && defined(size_t)
 #undef size_t
 #endif
 
