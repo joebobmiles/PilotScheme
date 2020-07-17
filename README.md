@@ -9,28 +9,28 @@ into a highly portable, single-header C library!
 
 ## Goals
 
-[ ] Quickest Scheme implementation (compiled _and_ interpreted).
-    [ ] Fast execution times.
-    [ ] Fast compile times.
-[ ] Racket-style macros-making-macros.
-[ ] Compiles to:
-    [ ] C-compatible native code.
-    [ ] Web Assembly.
-    [ ] SPIR-V.
-[ ] C/C++ interop via Foreign Function Interfaces.
-    [ ] 🦄 Julia-like direct calling into C, C++, and Fortran code.
-[ ] Fully embeddable compiler and interpreter.
-[ ] Build automation and package management are handled through Pilot Scheme.
-[ ] Compile-time code execution. (Think Jai's `#run` directive.)
-[ ] Compile-time memory management. (No garbage collector!)
-[ ] Self-hosting.
-[ ] Hot module reloading.
+- [ ] Quickest Scheme implementation (compiled _and_ interpreted).
+    - [ ] Fast execution times.
+    - [ ] Fast compile times.
+- [ ] Racket-style macros-making-macros.
+- [ ] Compiles to:
+    - [ ] C-compatible native code.
+    - [ ] Web Assembly.
+    - [ ] SPIR-V.
+- [ ] C/C++ interop via Foreign Function Interfaces.
+    - [ ] 🦄 Julia-like direct calling into C, C++, and Fortran code.
+- [ ] Fully embeddable compiler and interpreter.
+- [ ] Build automation and package management are handled through Pilot Scheme.
+- [ ] Compile-time code execution. (Think Jai's `#run` directive.)
+- [ ] Compile-time memory management. (No garbage collector!)
+- [ ] Self-hosting.
+- [ ] Hot module reloading.
 
 ## Non-goals
 
-[ ] Simple implementation.
-[ ] Become the best-est programming language in all the land.
-[ ] Solve all of software development's big problems.
+- [ ] Simple implementation.
+- [ ] Become the best-est programming language in all the land.
+- [ ] Solve all of software development's big problems.
 
 ## Getting Started
 
