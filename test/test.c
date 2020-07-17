@@ -16,14 +16,10 @@ main(void)
 
     plt_init(arena, max_arena_size);
 
-    plt_lexer lexer;
-    lexer.buffer = 0;
-    lexer.buffer_length = 0;
-    lexer.buffer_size = 0;
-    lexer.cursor_offset = 0;
+    plt_lexer lexer = { 0 };
     /// END compiler setup
     
-    plt_token t;
+    plt_token t = { 0 };
     do {
         t = plt_next_token(
             &lexer,
