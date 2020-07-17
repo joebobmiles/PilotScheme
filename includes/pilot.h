@@ -64,7 +64,7 @@ static size_t arena_length = 0;
  * @param   max_size        There's no way in hell we're relying on sentinels.
  */
 void
-plt_init(void* provided_arena, size_t max_size)
+plt_init(const void* provided_arena, const size_t max_size)
 {
     arena = provided_arena;
     arena_cursor = arena;
@@ -84,15 +84,15 @@ plt_init(void* provided_arena, size_t max_size)
  * @return  The start address of the freshly allocated memory.
  */
 static void*
-allocate(size_t requested_size)
+allocate(const size_t requested_size)
 {
     const size_t used_length = (size_t)arena_cursor - (size_t)arena;
 
     if (arena_length - used_length < requested_size)
         return 0;
 
-    void* address = arena_cursor;
-    arena_cursor = (void*) ((size_t)arena_cursor + requested_size);
+    const void* address = arena_cursor;
+    arena_cursor = (void*)((size_t)arena_cursor + requested_size);
 
     return address;
 }
@@ -107,7 +107,7 @@ allocate(size_t requested_size)
  * @param   destination Pointer to data destination.
  */
 static void
-copy(char* source, size_t source_size, char* destination)
+copy(const char* source, const size_t source_size, char* destination)
 {
     for (size_t i = 0; i < source_size; i++)
         destination[i] = source[i];
@@ -130,7 +130,7 @@ copy(char* source, size_t source_size, char* destination)
  * @return  The new character count of the buffer.
  */
 static int
-buffer_push(plt_lexer* lexer, char c)
+buffer_push(plt_lexer* lexer, const char c)
 {
     if (lexer->buffer_size == 0)
     {
@@ -139,7 +139,7 @@ buffer_push(plt_lexer* lexer, char c)
     }
     else if (lexer->buffer_length == lexer->buffer_size)
     {
-        char* old_buffer = lexer->buffer;
+        const char* old_buffer = lexer->buffer;
 
         lexer->buffer_size *= 2;
         lexer->buffer = allocate(sizeof(char) * lexer->buffer_size);
@@ -165,9 +165,9 @@ buffer_push(plt_lexer* lexer, char c)
  * @return  A poor-man's boolean, 1 if whitespace, 0 otherwise.
  */
 static int
-is_whitespace(char character)
+is_whitespace(const char character)
 {
-    char* whitespace_characters = " \t\r\n";
+    const char* whitespace_characters = " \t\r\n";
 
     for (char whitespace_character = *whitespace_characters;
          whitespace_character != '\0';
@@ -189,7 +189,7 @@ is_whitespace(char character)
  * @return  A poor-man's boolean, 1 if '(', 0 otherwise.
  */
 static inline int
-is_list_start(char character) { return character == '('; }
+is_list_start(const char character) { return character == '('; }
 
 /**
  * Is end of list?
@@ -201,7 +201,7 @@ is_list_start(char character) { return character == '('; }
  * @return  A poor-man's boolean, 1 if ')', 0 otherwise.
  */
 static inline int
-is_list_end(char character) { return character == ')'; }
+is_list_end(const char character) { return character == ')'; }
 
 /**
  * Retrieves the next token from the source code provided.
@@ -227,7 +227,7 @@ plt_next_token(
 
     while (lexer->cursor_offset < source_length)
     {
-        char c = source[lexer->cursor_offset];
+        const char c = source[lexer->cursor_offset];
 
         if (is_whitespace(c))
         {
