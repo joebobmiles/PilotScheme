@@ -117,6 +117,18 @@ copy(const char* source, const size_t source_size, char* destination)
         destination[i] = source[i];
 }
 
+static void*
+reallocate(const void* pointer, const size_t new_size)
+{
+    void* new_pointer = allocate(new_size);
+
+    const size_t* old_size = (size_t*)((size_t)pointer - sizeof(size_t));
+
+    copy(pointer, *old_size, new_pointer);
+
+    return new_pointer;
+}
+
 /// DYNAMIC BUFFERS
 
 /**
