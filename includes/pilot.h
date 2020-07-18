@@ -25,31 +25,12 @@ typedef unsigned long int __pilot_size_t;
 
 #endif // PILOT_DEFINE_SIZE_T
 
-typedef struct {
-    char* buffer;
-    unsigned int cursor_offset; // Offset into buffer
-} plt_lexer;
-
-typedef struct {
-    const char* text;
-
-    #define TOKEN_TYPES \
-        _(INVALID) \
-        _(LIST_START) \
-        _(LIST_END) \
-        _(NAME)
-
-    enum {
-        #define _(T) T,
-        TOKEN_TYPES
-        #undef _
-    } type;
-} plt_token;
-
 /// GLOBAL VARS
 static void* arena = 0;
 static void* arena_cursor = 0;
 static size_t arena_length = 0;
+
+/// INITIALIZATION
 
 /**
  * Pilot Scheme initialization.
@@ -68,7 +49,6 @@ plt_init(void* provided_arena, const size_t max_size)
     arena_cursor = arena;
     arena_length = max_size;
 }
-
 
 /// MEMORY MANAGEMENT
 
@@ -267,6 +247,37 @@ __buffer_growf(void* buffer, const unsigned int increment, size_t item_size)
 /// LEXING
 
 /**
+ * Stores Pilot Scheme's lexer state for a source string.
+ */
+typedef struct plt_lexer_s {
+    // A stretchy buffer used to temporarily store the text value of a token.
+    char* buffer;
+    // Where the lexer is currently located in the source string.
+    unsigned int cursor_offset;
+} plt_lexer;
+
+/**
+ * Stores data on a token extracted from a source string.
+ */
+typedef struct plt_token_s {
+    // Snippet of the source code this token represents.
+    const char* text;
+
+    #define TOKEN_TYPES \
+        _(INVALID) \
+        _(LIST_START) \
+        _(LIST_END) \
+        _(NAME)
+
+    // The type of token.
+    enum plt_token_type {
+        #define _(T) PLT_TOKEN_ ## T,
+        TOKEN_TYPES
+        #undef _
+    } type;
+} plt_token;
+
+/**
  * Is whitespace?
  * 
  * A predicate that confirms a character is, in fact, whitespace.
@@ -345,7 +356,7 @@ plt_next_token(
             if (buffer_count(lexer->buffer) > 0)
             {
                 t.text = lexer->buffer;
-                t.type = NAME;
+                t.type = PLT_TOKEN_NAME;
 
                 lexer->cursor_offset++;
                 break;
@@ -356,7 +367,7 @@ plt_next_token(
             if (buffer_count(lexer->buffer) > 0)
             {
                 t.text = lexer->buffer;
-                t.type = NAME;
+                t.type = PLT_TOKEN_NAME;
 
                 break;
             }
@@ -365,9 +376,9 @@ plt_next_token(
             t.text = lexer->buffer;
 
             if (is_list_start(c))
-                t.type = LIST_START;
+                t.type = PLT_TOKEN_LIST_START;
             else
-                t.type = LIST_END;
+                t.type = PLT_TOKEN_LIST_END;
             
             lexer->cursor_offset++;
             break;
