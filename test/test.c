@@ -13,6 +13,7 @@ main(void)
     /// BEGIN compiler setup
     const size_t max_arena_size = 1024;
     void* arena = malloc(max_arena_size);
+    memset(arena, 0, max_arena_size);
 
     plt_init(arena, max_arena_size);
 
