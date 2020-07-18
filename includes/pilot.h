@@ -158,9 +158,9 @@ buffer_push(plt_lexer* lexer, const char c)
         const char* old_buffer = lexer->buffer;
 
         lexer->buffer_size *= 2;
-        lexer->buffer = allocate(sizeof(char) * lexer->buffer_size);
-
-        copy(old_buffer, lexer->buffer_length, lexer->buffer);
+        lexer->buffer = reallocate(
+            lexer->buffer,
+            sizeof(char) * lexer->buffer_size);
     }
 
     lexer->buffer[lexer->buffer_length++] = c;
