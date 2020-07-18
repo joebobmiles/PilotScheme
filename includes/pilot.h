@@ -130,31 +130,105 @@ reallocate(const void* pointer, const size_t new_size)
 
 /// DYNAMIC BUFFERS
 
+/**
+ * Appends a value to the end of a stretchy buffer. After appending, tags a null
+ * terminator to the end of the stretchy buffer.
+ * 
+ * NOTE: The null terminator trick may not work for struct types!
+ * 
+ * @param b Either a NULL pointer or pointer to a stretchy buffer.
+ * @param value The value to append to the stretchy buffer.
+ * @return  Zero.
+ */
 #define buffer_append(b, value) \
     (__buffer_maybe_grow(b, 1), \
     (b)[__buffer_used(b)++] = (value), \
     (b)[__buffer_used(b)] = 0)
 
+/**
+ * Returns the number of items currently in the stretchy buffer.
+ * 
+ * @param b Either a NULL pointer or a pointer to a stretchy buffer.
+ * @return  The number of items in the stretchy buffer. (Zero for NULL pointer.)
+ */
 #define buffer_count(b) ((b) ? __buffer_used(b) : 0)
-#define buffer_reset(b) __buffer_used(b) = 0
 
+/**
+ * Sets the "used" section of the stretchy buffer header to 0, effectively 
+ * resetting the buffer.
+ * 
+ * @param b Either a NULL pointer or a pointer to a stretchy buffer.
+ * @return  Zero.
+ */
+#define buffer_reset(b) ((b) ? __buffer_used(b) = 0 : 0)
+
+/**
+ * Retrieves the raw stretchy buffer as a size_t*. This allows direct access to
+ * the 'size' and 'used' values, stored at index 0 and index 1, respectively.
+ * 
+ * @param b A pointer to a stretchy buffer.
+ * @return  The pointer to the raw stretchy buffer.
+ */
 #define __buffer_raw(b) \
     ((size_t*)((size_t)(b) - (sizeof(size_t) * 2)))
 
+/**
+ * Retrieves the 'size' value from a stretchy buffer.
+ * 
+ * @param b A pointer to a stretchy buffer.
+ * @return  The amount of space allocated to the stretchy buffer.
+ */
 #define __buffer_size(b) __buffer_raw(b)[0]
+
+/**
+ * Retrieves the 'used' value from a stretchy buffer.
+ * 
+ * @param b A pointer to a stretchy buffer.
+ * @return  The number of items in the stretchy buffer.
+ */
 #define __buffer_used(b) __buffer_raw(b)[1]
 
+/**
+ * Decides if a stretchy buffer needs to grow to accomodate more elements.
+ * 
+ * @param b Either a NULL pointer or a pointer to a stretchy buffer.
+ * @param increment The number of new elements the buffer needs to accomodate.
+ * @return  Zero if buffer has space, or one if buffer needs to be reallocated.
+ */
 #define __buffer_needs_to_grow(b, increment) \
     ((b) == 0 || __buffer_used(b) + (increment) >= __buffer_size(b))
 
+/**
+ * Grows the stretch buffer by calling __buffer_growf() and then assigning the
+ * passed buffer to the newly allocated pointer.
+ * 
+ * @param b Either a NULL pointer or a pointer to a stretchy buffer.
+ * @param increment The number of new elements the buffer needs to accomodate.
+ * @return  A pointer to the reallocated buffer.
+ */ 
 #define __buffer_grow(b, increment) \
     (*((void**)&(b)) = __buffer_growf((b), (increment), sizeof(*(b))))
 
+/**
+ * Optionally grows the stretchy buffer if the buffer needs to grow.
+ * 
+ * @param b Either a null pointer or a pointer to a stretchy buffer.
+ * @param increment The number of new elements the buffer needs to accomodate.
+ * @return  Zero or the pointer to the reallocated buffer.
+ */
 #define __buffer_maybe_grow(b, increment) \
     (__buffer_needs_to_grow(b, (increment))) \
     ? __buffer_grow(b, (increment)) \
     : 0
 
+/**
+ * Grows a stretchy buffer.
+ * 
+ * @param buffer    Either a NULL pointer or a pointer to a stretchy buffer.
+ * @param increment The number of new elements the buffer needs to accomodate.
+ * @param item_size The number of bytes an item in the stretchy buffer takes up.
+ * @return  A pointer to the newly (re)allocated stretchy buffer.
+ */
 static void*
 __buffer_growf(void* buffer, const unsigned int increment, size_t item_size)
 {
