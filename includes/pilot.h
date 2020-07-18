@@ -88,13 +88,17 @@ allocate(const size_t requested_size)
 {
     const size_t used_length = (size_t)arena_cursor - (size_t)arena;
 
-    if (arena_length - used_length < requested_size)
+    const size_t actual_allocation_size = requested_size + sizeof(size_t);
+
+    if (arena_length - used_length < actual_allocation_size)
         return 0;
 
-    const void* address = arena_cursor;
-    arena_cursor = (void*)((size_t)arena_cursor + requested_size);
+    size_t* allocated_pointer = arena_cursor;
+    arena_cursor = (void*)((size_t)arena_cursor + actual_allocation_size);
 
-    return address;
+    *allocated_pointer = requested_size;
+
+    return (void*)((size_t)allocated_pointer + sizeof(size_t));
 }
 
 /**
