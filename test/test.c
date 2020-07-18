@@ -9,7 +9,7 @@
 
 UTEST(basic, first_token_invalid_for_empty_input)
 {
-    const size_t memory_pool_size = 1;
+    const size_t memory_pool_size = 16;
     void* memory_pool = malloc(memory_pool_size);
     memset(memory_pool, 0, memory_pool_size);
 
@@ -28,7 +28,7 @@ UTEST(basic, first_token_invalid_for_empty_input)
 
 UTEST(lexing, identifies_open_paren)
 {
-    const size_t memory_pool_size = 1;
+    const size_t memory_pool_size = 16;
     void* memory_pool = malloc(memory_pool_size);
     memset(memory_pool, 0, memory_pool_size);
 
@@ -47,7 +47,7 @@ UTEST(lexing, identifies_open_paren)
 
 UTEST(lexing, identifies_close_paren)
 {
-    const size_t memory_pool_size = 1;
+    const size_t memory_pool_size = 16;
     void* memory_pool = malloc(memory_pool_size);
     memset(memory_pool, 0, memory_pool_size);
 
@@ -66,7 +66,7 @@ UTEST(lexing, identifies_close_paren)
 
 UTEST(lexing, identifies_name)
 {
-    const size_t memory_pool_size = 1;
+    const size_t memory_pool_size = 16;
     void* memory_pool = malloc(memory_pool_size);
     memset(memory_pool, 0, memory_pool_size);
 
