@@ -64,7 +64,7 @@ static size_t arena_length = 0;
  * @param   max_size        There's no way in hell we're relying on sentinels.
  */
 void
-plt_init(const void* provided_arena, const size_t max_size)
+plt_init(void* provided_arena, const size_t max_size)
 {
     arena = provided_arena;
     arena_cursor = arena;
