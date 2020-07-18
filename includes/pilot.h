@@ -27,8 +27,6 @@ typedef unsigned long int __pilot_size_t;
 
 typedef struct {
     char* buffer;
-    unsigned int buffer_length;
-    unsigned int buffer_size;
     unsigned int cursor_offset; // Offset into buffer
 } plt_lexer;
 
@@ -132,42 +130,64 @@ reallocate(const void* pointer, const size_t new_size)
 
 /// DYNAMIC BUFFERS
 
-/**
- * Push new character onto lexer->buffer.
- * 
- * Pushes a new character onto the end of lexer->buffer. Validates that there's
- * space, and if there is none, either allocates buffer (assuming it's empty),
- * or re-allocates the buffer with a bigger size to accomodate the new character.
- * The buffer is null-terminated for extra safety.
- * 
- * TODO(jrm): Generalize this?
- * 
- * @param   lexer   The lexer being used to perform lexing.
- * @param   c   The character being pushed onto the buffer.
- * @return  The new character count of the buffer.
- */
-static int
-buffer_push(plt_lexer* lexer, const char c)
+#define buffer_append(b, value) \
+    (__buffer_maybe_grow(b, 1), \
+    (b)[__buffer_used(b)++] = (value), \
+    (b)[__buffer_used(b)] = 0)
+
+#define buffer_count(b) ((b) ? __buffer_used(b) : 0)
+#define buffer_reset(b) __buffer_used(b) = 0
+
+#define __buffer_raw(b) \
+    ((size_t*)((size_t)(b) - (sizeof(size_t) * 2)))
+
+#define __buffer_size(b) __buffer_raw(b)[0]
+#define __buffer_used(b) __buffer_raw(b)[1]
+
+#define __buffer_needs_to_grow(b, increment) \
+    ((b) == 0 || __buffer_used(b) + (increment) >= __buffer_size(b))
+
+#define __buffer_grow(b, increment) \
+    (*((void**)&(b)) = __buffer_growf((b), (increment), sizeof(*(b))))
+
+#define __buffer_maybe_grow(b, increment) \
+    (__buffer_needs_to_grow(b, (increment))) \
+    ? __buffer_grow(b, (increment)) \
+    : 0
+
+static void*
+__buffer_growf(void* buffer, const unsigned int increment, size_t item_size)
 {
-    if (lexer->buffer_size == 0)
+    size_t double_current_size = buffer ? 2 * (__buffer_size(buffer)) : 0;
+    size_t minimum_needed_size = buffer_count(buffer) + increment;
+
+    // We do this because, when the buffer is empty (i.e. NULL pointer),
+    // double_current_size is zero and minimum_needed_size is one. This also
+    // allows us to implement a stb_sb_add() macro that grows the buffer by an
+    // arbitrary increment, instead of an increment of one.
+    size_t new_size =
+        double_current_size > minimum_needed_size
+        ? double_current_size
+        : minimum_needed_size;
+
+    size_t* new_buffer = reallocate(
+        buffer ? __buffer_raw(buffer) : 0,
+        item_size * new_size + sizeof(size_t) * 2);
+
+    if (new_buffer)
     {
-        lexer->buffer_size = 2;
-        lexer->buffer = allocate(sizeof(char) * lexer->buffer_size);
+        new_buffer[0] = new_size;
+
+        if (!buffer)
+            new_buffer[1] = 0;
+
+        return &new_buffer[2];
     }
-    else if (lexer->buffer_length == lexer->buffer_size)
+    else
     {
-        const char* old_buffer = lexer->buffer;
-
-        lexer->buffer_size *= 2;
-        lexer->buffer = reallocate(
-            lexer->buffer,
-            sizeof(char) * lexer->buffer_size);
+        // TODO: OUT OF MEMORY!!!
+        return 0;
     }
-
-    lexer->buffer[lexer->buffer_length++] = c;
-    lexer->buffer[lexer->buffer_length] = '\0';
-
-    return lexer->buffer_length;
 }
 
 /// LEXING
@@ -248,7 +268,7 @@ plt_next_token(
 
         if (is_whitespace(c))
         {
-            if (lexer->buffer_length > 0)
+            if (buffer_count(lexer->buffer) > 0)
             {
                 t.text = lexer->buffer;
                 t.type = NAME;
@@ -259,7 +279,7 @@ plt_next_token(
         }
         else if (is_list_start(c) || is_list_end(c))
         {
-            if (lexer->buffer_length > 0)
+            if (buffer_count(lexer->buffer) > 0)
             {
                 t.text = lexer->buffer;
                 t.type = NAME;
@@ -267,7 +287,7 @@ plt_next_token(
                 break;
             }
 
-            buffer_push(lexer, c);
+            buffer_append(lexer->buffer, c);
             t.text = lexer->buffer;
 
             if (is_list_start(c))
@@ -280,12 +300,12 @@ plt_next_token(
         }
         else
         {
-            buffer_push(lexer, c);
+            buffer_append(lexer->buffer, c);
             lexer->cursor_offset++;
         }
     }
 
-    lexer->buffer_length = 0;
+    buffer_reset(lexer->buffer);
 
     return t;
 }
