@@ -43,9 +43,14 @@ keep your headers. Here's an example of how to use Pilot Scheme:
 > illustrates its use.
 
 ```c
+#include "pilot.h"
+
+// ...
+
 // Allocate a memory pool of 1024B.
 size_t memory_pool_size = 1024;
 char*  memory_pool = malloc(memory_pool_size);
+memset(memory_pool, 0, memory_pool_size);
 
 // Initialize Pilot Scheme with the allocated memory pool.
 plt_init(memory_pool, memory_pool_size);
@@ -65,6 +70,8 @@ do {
     // Prints out the text value of the identified token.
     printf("%s\n", t.text);
 } while(t.type != INVALID);
+
+free(memory_pool);
 ```
 
 ### Testing 🛫Pilot Scheme
