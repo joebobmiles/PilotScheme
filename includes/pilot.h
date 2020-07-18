@@ -124,7 +124,8 @@ reallocate(const void* pointer, const size_t new_size)
 
     const size_t* old_size = (size_t*)((size_t)pointer - sizeof(size_t));
 
-    copy(pointer, *old_size, new_pointer);
+    if (pointer)
+        copy(pointer, *old_size, new_pointer);
 
     return new_pointer;
 }
