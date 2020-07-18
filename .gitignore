@@ -8,3 +8,5 @@ lib/
 
 .sublime/
 .vscode/
+
+*.plist
