@@ -5,36 +5,82 @@
 
 #include "pilot.h"
 
-int
-main(void)
+#include "utest.h"
+
+UTEST(basic, first_token_invalid_for_empty_input)
 {
-    const char* source = "(cons 1 2)";
+    const size_t memory_pool_size = 1;
+    void* memory_pool = malloc(memory_pool_size);
+    memset(memory_pool, 0, memory_pool_size);
 
-    /// BEGIN compiler setup
-    const size_t max_arena_size = 1024;
-    void* arena = malloc(max_arena_size);
-    memset(arena, 0, max_arena_size);
-
-    plt_init(arena, max_arena_size);
+    plt_init(memory_pool, memory_pool_size);
 
     plt_lexer lexer = { 0 };
-    /// END compiler setup
-    
-    plt_token t = { 0 };
-    do {
-        t = plt_next_token(
-            &lexer,
-            source,
-            strlen(source));
+    plt_token token = plt_next_token(
+        &lexer,
+        "",
+        0);
 
-        // TODO(jrm)
-        printf("%#010x\t%s\n",
-            (unsigned int) t.text,
-            t.text);
-    } while(t.type != INVALID);
+    ASSERT_EQ(token.type, INVALID);
 
-    /// Compiler teardown
-    free(arena);
-
-    return 0;
+    free(memory_pool);
 }
+
+UTEST(lexing, identifies_open_paren)
+{
+    const size_t memory_pool_size = 1;
+    void* memory_pool = malloc(memory_pool_size);
+    memset(memory_pool, 0, memory_pool_size);
+
+    plt_init(memory_pool, memory_pool_size);
+
+    plt_lexer lexer = { 0 };
+    plt_token token = plt_next_token(
+        &lexer,
+        "(",
+        1);
+
+    ASSERT_EQ(token.type, LIST_START);
+
+    free(memory_pool);
+}
+
+UTEST(lexing, identifies_close_paren)
+{
+    const size_t memory_pool_size = 1;
+    void* memory_pool = malloc(memory_pool_size);
+    memset(memory_pool, 0, memory_pool_size);
+
+    plt_init(memory_pool, memory_pool_size);
+
+    plt_lexer lexer = { 0 };
+    plt_token token = plt_next_token(
+        &lexer,
+        ")",
+        1);
+
+    ASSERT_EQ(token.type, LIST_END);
+
+    free(memory_pool);
+}
+
+UTEST(lexing, identifies_name)
+{
+    const size_t memory_pool_size = 1;
+    void* memory_pool = malloc(memory_pool_size);
+    memset(memory_pool, 0, memory_pool_size);
+
+    plt_init(memory_pool, memory_pool_size);
+
+    plt_lexer lexer = { 0 };
+    plt_token token = plt_next_token(
+        &lexer,
+        "cons",
+        1);
+
+    ASSERT_EQ(token.type, NAME);
+
+    free(memory_pool);
+}
+
+UTEST_MAIN()
