@@ -384,9 +384,22 @@ plt_next_token(
     return t;
 }
 
-// Clean up size_t definition so we don't polute consumer's namespace.
+/// CLEANUP
+
+// Clean up size_t definition so we don't pollute consumer's namespace.
 #if defined(PILOT_DEFINE_SIZE_T) && defined(size_t)
 #undef size_t
 #endif
+
+// Clean up stretchy buffer defines.
+#undef buffer_append
+#undef buffer_count
+#undef buffer_reset
+#undef __buffer_raw
+#undef __buffer_size
+#undef __buffer_used
+#undef __buffer_needs_to_grow
+#undef __buffer_grow
+#undef __buffer_maybe_grow
 
 #endif
