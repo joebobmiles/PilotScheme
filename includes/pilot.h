@@ -69,7 +69,13 @@ allocate(const size_t requested_size)
     const size_t actual_allocation_size = requested_size + sizeof(size_t);
 
     if (arena_length - used_length < actual_allocation_size)
+    {
+        #ifdef PLT_OUT_OF_MEMORY
+        PLT_OUT_OF_MEMORY(used_length + actual_allocation_size, arena_length) ;
+        #endif
+
         return 0;
+    }
 
     size_t* allocated_pointer = arena_cursor;
     arena_cursor = (void*)((size_t)arena_cursor + actual_allocation_size);
@@ -102,7 +108,7 @@ reallocate(const void* pointer, const size_t new_size)
 
     const size_t* old_size = (size_t*)((size_t)pointer - sizeof(size_t));
 
-    if (pointer)
+    if (pointer && new_pointer)
         copy(pointer, *old_size, new_pointer);
 
     return new_pointer;
@@ -237,11 +243,8 @@ __buffer_growf(void* buffer, const unsigned int increment, size_t item_size)
 
         return &new_buffer[2];
     }
-    else
-    {
-        // TODO: OUT OF MEMORY!!!
-        return 0;
-    }
+    // Out of memory.
+    else return 0;
 }
 
 /// LEXING

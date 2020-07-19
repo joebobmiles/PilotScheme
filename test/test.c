@@ -3,13 +3,21 @@
 #include "stdlib.h"
 #include "string.h"
 
+#define PLT_OUT_OF_MEMORY(demanded_size, given_size) \
+    printf( \
+        "Insufficient memory!\n" \
+        "Required: %lld bytes\n" \
+        "Given: %lld bytes\n", \
+        demanded_size, \
+        given_size);
+
 #include "pilot.h"
 
 #include "utest.h"
 
 UTEST(basic, first_token_invalid_for_empty_input)
 {
-    const size_t memory_pool_size = 16;
+    const size_t memory_pool_size = 1024;
     void* memory_pool = malloc(memory_pool_size);
     memset(memory_pool, 0, memory_pool_size);
 
@@ -28,7 +36,7 @@ UTEST(basic, first_token_invalid_for_empty_input)
 
 UTEST(lexing, identifies_open_paren)
 {
-    const size_t memory_pool_size = 16;
+    const size_t memory_pool_size = 1024;
     void* memory_pool = malloc(memory_pool_size);
     memset(memory_pool, 0, memory_pool_size);
 
@@ -47,7 +55,7 @@ UTEST(lexing, identifies_open_paren)
 
 UTEST(lexing, identifies_close_paren)
 {
-    const size_t memory_pool_size = 16;
+    const size_t memory_pool_size = 1024;
     void* memory_pool = malloc(memory_pool_size);
     memset(memory_pool, 0, memory_pool_size);
 
@@ -66,7 +74,7 @@ UTEST(lexing, identifies_close_paren)
 
 UTEST(lexing, identifies_name)
 {
-    const size_t memory_pool_size = 16;
+    const size_t memory_pool_size = 1024;
     void* memory_pool = malloc(memory_pool_size);
     memset(memory_pool, 0, memory_pool_size);
 
