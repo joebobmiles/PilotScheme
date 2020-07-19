@@ -6,8 +6,8 @@
 #define PLT_OUT_OF_MEMORY(demanded_size, given_size) \
     printf( \
         "Insufficient memory!\n" \
-        "Required: %lld bytes\n" \
-        "Given: %lld bytes\n", \
+        "Required:\t%lld bytes\n" \
+        "Given:\t%lld bytes\n", \
         demanded_size, \
         given_size);
 
@@ -29,7 +29,7 @@ UTEST(basic, first_token_invalid_for_empty_input)
         "",
         0);
 
-    ASSERT_EQ(token.type, PLT_TOKEN_INVALID);
+    ASSERT_EQ(PLT_TOKEN_INVALID, token.type);
 
     free(memory_pool);
 }
@@ -48,7 +48,7 @@ UTEST(lexing, identifies_open_paren)
         "(",
         1);
 
-    ASSERT_EQ(token.type, PLT_TOKEN_LIST_START);
+    ASSERT_EQ(PLT_TOKEN_LIST_START, token.type);
 
     free(memory_pool);
 }
@@ -67,7 +67,7 @@ UTEST(lexing, identifies_close_paren)
         ")",
         1);
 
-    ASSERT_EQ(token.type, PLT_TOKEN_LIST_END);
+    ASSERT_EQ(PLT_TOKEN_LIST_END, token.type);
 
     free(memory_pool);
 }
@@ -86,7 +86,7 @@ UTEST(lexing, identifies_name)
         "cons",
         1);
 
-    ASSERT_EQ(token.type, PLT_TOKEN_NAME);
+    ASSERT_EQ(PLT_TOKEN_NAME, token.type);
 
     free(memory_pool);
 }
