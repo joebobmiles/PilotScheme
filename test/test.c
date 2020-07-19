@@ -80,11 +80,14 @@ UTEST(lexing, identifies_name)
 
     plt_init(memory_pool, memory_pool_size);
 
+    const char* string = "cons";
+    const size_t string_length = strlen(string);
+
     plt_lexer lexer = { 0 };
     plt_token token = plt_next_token(
         &lexer,
-        "cons",
-        1);
+        string,
+        string_length);
 
     ASSERT_EQ(PLT_TOKEN_NAME, token.type);
 

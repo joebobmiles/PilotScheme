@@ -393,6 +393,18 @@ plt_next_token(
         }
     }
 
+    // HACK: The only time in the main loop we create a NAME token is when we
+    // encounter either whitespace or a paren. This saves our bacon if the only
+    // token in the source is a name.
+    // TODO: We need a more robust means of lexing source code so that we can do
+    // as much work as possible in the main loop without having awkward cleanup
+    // code dangling at the bottom.
+    if (t.type == PLT_TOKEN_INVALID && buffer_count(lexer->buffer))
+    {
+        t.text = lexer->buffer;
+        t.type = PLT_TOKEN_NAME;
+    }
+
     buffer_reset(lexer->buffer);
 
     return t;
