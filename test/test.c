@@ -72,6 +72,7 @@ UTEST(lexing, identifies_close_paren)
     free(memory_pool);
 }
 
+/// TODO: Hangs indefinitely...
 UTEST(lexing, identifies_name)
 {
     const size_t memory_pool_size = 1024;
@@ -89,7 +90,7 @@ UTEST(lexing, identifies_name)
         string,
         string_length);
 
-    ASSERT_EQ(PLT_TOKEN_NAME, token.type);
+    ASSERT_EQ(PLT_TOKEN_IDENT, token.type);
 
     free(memory_pool);
 }

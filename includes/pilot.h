@@ -270,7 +270,9 @@ typedef struct plt_token_s {
         _(INVALID) \
         _(LIST_START) \
         _(LIST_END) \
-        _(NAME)
+        _(QUOTE) \
+        _(NUMBER) \
+        _(IDENT)
 
     // The type of token.
     enum plt_token_type {
@@ -279,54 +281,6 @@ typedef struct plt_token_s {
         #undef _
     } type;
 } plt_token;
-
-/**
- * Is whitespace?
- * 
- * A predicate that confirms a character is, in fact, whitespace.
- * TODO(jrm): Make this branchless?
- * 
- * @param   character   The character to check.
- * @return  A poor-man's boolean, 1 if whitespace, 0 otherwise.
- */
-static int
-is_whitespace(const char character)
-{
-    const char* whitespace_characters = " \t\r\n";
-
-    for (char whitespace_character = *whitespace_characters;
-         whitespace_character != '\0';
-         whitespace_character = *(++whitespace_characters))
-    {
-        if (character == whitespace_character) return 1;
-    }
-
-    return 0;
-}
-
-/**
- * Is start of list?
- * 
- * A predicate that checks if a character is equal to '(', the traditional Lisp
- * "start of list" character.
- * 
- * @param   character   The character to check.
- * @return  A poor-man's boolean, 1 if '(', 0 otherwise.
- */
-static inline int
-is_list_start(const char character) { return character == '('; }
-
-/**
- * Is end of list?
- * 
- * A predicate that checks if a character is equal to ')', the traditional Lisp
- * "end of list" character.
- * 
- * @param   character   The character to check.
- * @return  A poor-man's boolean, 1 if ')', 0 otherwise.
- */
-static inline int
-is_list_end(const char character) { return character == ')'; }
 
 /**
  * Retrieves the next token from the source code provided.
@@ -348,63 +302,121 @@ plt_next_token(
 {
     plt_token t;
     t.text = 0;
-    t.type = 0;
+    t.type = PLT_TOKEN_INVALID;
 
     while (lexer->cursor_offset < source_length)
     {
         const char c = source[lexer->cursor_offset];
 
-        if (is_whitespace(c))
+        switch (c)
         {
-            if (buffer_count(lexer->buffer) > 0)
-            {
-                t.text = lexer->buffer;
-                t.type = PLT_TOKEN_NAME;
-
-                lexer->cursor_offset++;
+            // Skip whitespace.
+            case ' ':
+            case '\t':
+            case '\r':
+            case '\n':
                 break;
-            }
-        }
-        else if (is_list_start(c) || is_list_end(c))
-        {
-            if (buffer_count(lexer->buffer) > 0)
+
+            case '(':
             {
-                t.text = lexer->buffer;
-                t.type = PLT_TOKEN_NAME;
-
-                break;
-            }
-
-            buffer_append(lexer->buffer, c);
-            t.text = lexer->buffer;
-
-            if (is_list_start(c))
+                t.text = "("; // Questioning if this is valid...
                 t.type = PLT_TOKEN_LIST_START;
-            else
+                
+                goto cleanup;
+            } break;
+
+            case ')':
+            {
+                t.text = ")"; // Questioning if this is valid...
                 t.type = PLT_TOKEN_LIST_END;
-            
-            lexer->cursor_offset++;
-            break;
+
+                goto cleanup;
+            } break;
+
+            case '\'':
+            {
+                t.text = "\'"; // Questioning if this is valid...
+                t.type = PLT_TOKEN_QUOTE;
+
+                goto cleanup;
+            } break;
+
+            default:
+            {
+                #define peek() \
+                    (lexer->cursor_offset < source_length) \
+                    ? source[lexer->cursor_offset] \
+                    : '\0'
+
+                #define peek_next() \
+                    (lexer->cursor_offset < source_length) \
+                    ? source[lexer->cursor_offset + 1] \
+                    : '\0'
+
+                #define advance() \
+                    (lexer->cursor_offset < source_length) \
+                    ? buffer_append( \
+                        lexer->buffer, \
+                        source[lexer->cursor_offset++]) \
+                    : 0
+
+                #define is_digit(c) (c >= '0' && c <= '9')
+
+                #define is_alphanum(c) \
+                    (is_digit(c) \
+                    || (c >= 'A' && c <= 'Z') \
+                    || (c >= 'a' && c <= 'z') \
+                    || (c == '_') \
+                    || (c == '-'))
+
+                if (is_digit(c))
+                {
+                    // read number
+                    while (is_digit(peek()))
+                        advance();
+
+                    if (peek() == '.' && is_digit(peek_next()))
+                    {
+                        advance();
+
+                        while (is_digit(peek()))
+                            advance();
+                    }
+
+                    t.text = lexer->buffer;
+                    t.type = PLT_TOKEN_NUMBER;
+
+                    goto cleanup;
+                }
+                else
+                {
+                    // read identifier
+                    // NOTE: This will be complicated...
+                    // Because we want UTF8 support, and Lisps allow crazy
+                    // things as identifiers... we're gonna have to get a little
+                    // creative to get this to work.
+
+                    // NOTE: Just a little hack for now to have identifiers.
+                    while (is_alphanum(peek()))
+                        advance();
+
+                    t.text = lexer->buffer;
+                    t.type = PLT_TOKEN_IDENT;
+
+                    goto cleanup;
+                }
+
+                #undef peek
+                #undef peek_next
+                #undef advance
+                #undef is_digit
+            } break;
         }
-        else
-        {
-            buffer_append(lexer->buffer, c);
-            lexer->cursor_offset++;
-        }
+
+        lexer->cursor_offset++;
     }
 
-    // HACK: The only time in the main loop we create a NAME token is when we
-    // encounter either whitespace or a paren. This saves our bacon if the only
-    // token in the source is a name.
-    // TODO: We need a more robust means of lexing source code so that we can do
-    // as much work as possible in the main loop without having awkward cleanup
-    // code dangling at the bottom.
-    if (t.type == PLT_TOKEN_INVALID && buffer_count(lexer->buffer))
-    {
-        t.text = lexer->buffer;
-        t.type = PLT_TOKEN_NAME;
-    }
-
+    cleanup:
     buffer_reset(lexer->buffer);
 
     return t;
