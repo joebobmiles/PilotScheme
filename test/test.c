@@ -9,7 +9,7 @@
         "Required:\t%lld bytes\n" \
         "Given:\t%lld bytes\n", \
         demanded_size, \
-        given_size);
+        given_size)
 
 #include "pilot.h"
 
