@@ -360,14 +360,14 @@ plt_next_token(
                         source[lexer->cursor_offset++]) \
                     : 0
 
-                #define is_digit(c) (c >= '0' && c <= '9')
+                #define is_digit(c) ((c) >= '0' && (c) <= '9')
 
                 #define is_alphanum(c) \
                     (is_digit(c) \
-                    || (c >= 'A' && c <= 'Z') \
-                    || (c >= 'a' && c <= 'z') \
-                    || (c == '_') \
-                    || (c == '-'))
+                    || ((c) >= 'A' && (c) <= 'Z') \
+                    || ((c) >= 'a' && (c) <= 'z') \
+                    || ((c) == '_') \
+                    || ((c) == '-'))
 
                 if (is_digit(c))
                 {
