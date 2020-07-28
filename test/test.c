@@ -72,8 +72,39 @@ UTEST(lexing, identifies_close_paren)
     free(memory_pool);
 }
 
-/// TODO: Hangs indefinitely...
-UTEST(lexing, identifies_name)
+UTEST(lexing, identifies_quote)
+{
+    const size_t memory_pool_size = 1024;
+    void* memory_pool = malloc(memory_pool_size);
+    memset(memory_pool, 0, memory_pool_size);
+
+    plt_init(memory_pool, memory_pool_size);
+
+    plt_lexer lexer = { 0 };
+    plt_token token = plt_next_token(&lexer, "\'", 1);
+
+    ASSERT_EQ(PLT_TOKEN_QUOTE, token.type);
+
+    free(memory_pool);
+}
+
+UTEST(lexing, identifies_number)
+{
+    const size_t memory_pool_size = 1024;
+    void* memory_pool = malloc(memory_pool_size);
+    memset(memory_pool, 0, memory_pool_size);
+
+    plt_init(memory_pool, memory_pool_size);
+
+    plt_lexer lexer = { 0 };
+    plt_token token = plt_next_token(&lexer, "0", 1);
+
+    ASSERT_EQ(PLT_TOKEN_NUMBER, token.type);
+
+    free(memory_pool);
+}
+
+UTEST(lexing, identifies_ident)
 {
     const size_t memory_pool_size = 1024;
     void* memory_pool = malloc(memory_pool_size);
