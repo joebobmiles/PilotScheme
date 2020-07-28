@@ -126,4 +126,37 @@ UTEST(lexing, identifies_ident)
     free(memory_pool);
 }
 
+UTEST(lexing, correctly_identifies_consecutive_tokens)
+{
+    const size_t memory_pool_size = 1024;
+    void* memory_pool = malloc(memory_pool_size);
+    memset(memory_pool, 0, memory_pool_size);
+
+    plt_init(memory_pool, memory_pool_size);
+
+    const char* source = "(cons";
+
+    plt_lexer lexer = { 0 };
+
+    // Extract first token (paren)
+    plt_token paren = plt_next_token(
+        &lexer,
+        source,
+        strlen(source));
+
+    EXPECT_EQ(PLT_TOKEN_LIST_START, paren.type);
+    EXPECT_STREQ("(", paren.text);
+
+    // Extract second token (identifier)
+    plt_token ident = plt_next_token(
+        &lexer,
+        source,
+        strlen(source));
+
+    EXPECT_EQ(PLT_TOKEN_IDENT, ident.type);
+    EXPECT_STREQ("cons", ident.text);
+
+    free(memory_pool);
+}
+
 UTEST_MAIN()

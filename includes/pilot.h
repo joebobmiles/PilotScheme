@@ -338,9 +338,24 @@ plt_next_token(
 
     while (lexer->cursor_offset < source_length)
     {
-        const char c = source[lexer->cursor_offset];
+        #define peek() \
+            (lexer->cursor_offset < source_length) \
+            ? source[lexer->cursor_offset] \
+            : '\0'
 
-        switch (c)
+        #define peek_next() \
+            (lexer->cursor_offset < source_length) \
+            ? source[lexer->cursor_offset + 1] \
+            : '\0'
+
+        #define advance() \
+            (lexer->cursor_offset < source_length) \
+            ? buffer_append( \
+                lexer->buffer, \
+                source[lexer->cursor_offset++]) \
+            : 0
+
+        switch (peek())
         {
             // Skip whitespace.
             case ' ':
@@ -351,7 +366,9 @@ plt_next_token(
 
             case '(':
             {
-                t.text = "("; // Questioning if this is valid...
+                advance();
+
+                t.text = lexer->buffer;
                 t.type = PLT_TOKEN_LIST_START;
                 
                 goto cleanup;
@@ -359,7 +376,9 @@ plt_next_token(
 
             case ')':
             {
-                t.text = ")"; // Questioning if this is valid...
+                advance();
+
+                t.text = lexer->buffer;
                 t.type = PLT_TOKEN_LIST_END;
 
                 goto cleanup;
@@ -367,7 +386,9 @@ plt_next_token(
 
             case '\'':
             {
-                t.text = "\'"; // Questioning if this is valid...
+                advance();
+
+                t.text = lexer->buffer;
                 t.type = PLT_TOKEN_QUOTE;
 
                 goto cleanup;
@@ -375,23 +396,6 @@ plt_next_token(
 
             default:
             {
-                #define peek() \
-                    (lexer->cursor_offset < source_length) \
-                    ? source[lexer->cursor_offset] \
-                    : '\0'
-
-                #define peek_next() \
-                    (lexer->cursor_offset < source_length) \
-                    ? source[lexer->cursor_offset + 1] \
-                    : '\0'
-
-                #define advance() \
-                    (lexer->cursor_offset < source_length) \
-                    ? buffer_append( \
-                        lexer->buffer, \
-                        source[lexer->cursor_offset++]) \
-                    : 0
-
                 #define is_digit(c) ((c) >= '0' && (c) <= '9')
 
                 #define is_alphanum(c) \
@@ -401,7 +405,7 @@ plt_next_token(
                     || ((c) == '_') \
                     || ((c) == '-'))
 
-                if (is_digit(c))
+                if (is_digit(peek()))
                 {
                     // read number
                     while (is_digit(peek()))
@@ -438,14 +442,14 @@ plt_next_token(
                     goto cleanup;
                 }
 
-                #undef peek
-                #undef peek_next
-                #undef advance
                 #undef is_digit
+                #undef is_alphanum
             } break;
         }
 
-        lexer->cursor_offset++;
+        #undef peek
+        #undef peek_next
+        #undef advance
     }
 
     cleanup:
