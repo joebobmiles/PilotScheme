@@ -29,7 +29,7 @@ UTEST(basic, first_token_invalid_for_empty_input)
         "",
         0);
 
-    ASSERT_EQ(PLT_TOKEN_INVALID, token.type);
+    EXPECT_EQ(PLT_TOKEN_INVALID, token.type);
 
     free(memory_pool);
 }
@@ -48,7 +48,7 @@ UTEST(lexing, identifies_open_paren)
         "(",
         1);
 
-    ASSERT_EQ(PLT_TOKEN_LIST_START, token.type);
+    EXPECT_EQ(PLT_TOKEN_LIST_START, token.type);
 
     free(memory_pool);
 }
@@ -67,7 +67,7 @@ UTEST(lexing, identifies_close_paren)
         ")",
         1);
 
-    ASSERT_EQ(PLT_TOKEN_LIST_END, token.type);
+    EXPECT_EQ(PLT_TOKEN_LIST_END, token.type);
 
     free(memory_pool);
 }
@@ -83,7 +83,7 @@ UTEST(lexing, identifies_quote)
     plt_lexer lexer = { 0 };
     plt_token token = plt_next_token(&lexer, "\'", 1);
 
-    ASSERT_EQ(PLT_TOKEN_QUOTE, token.type);
+    EXPECT_EQ(PLT_TOKEN_QUOTE, token.type);
 
     free(memory_pool);
 }
@@ -99,7 +99,7 @@ UTEST(lexing, identifies_number)
     plt_lexer lexer = { 0 };
     plt_token token = plt_next_token(&lexer, "0", 1);
 
-    ASSERT_EQ(PLT_TOKEN_NUMBER, token.type);
+    EXPECT_EQ(PLT_TOKEN_NUMBER, token.type);
 
     free(memory_pool);
 }
@@ -121,7 +121,7 @@ UTEST(lexing, identifies_ident)
         string,
         string_length);
 
-    ASSERT_EQ(PLT_TOKEN_IDENT, token.type);
+    EXPECT_EQ(PLT_TOKEN_IDENT, token.type);
 
     free(memory_pool);
 }
