@@ -101,6 +101,18 @@ copy(const char* source, const size_t source_size, char* destination)
         destination[i] = source[i];
 }
 
+/**
+ * Reallocates the given (allocated) pointer.
+ * 
+ * Moves the pointer to a new region of the memory pool where it is allocated
+ * the requested new_size of bytes. All data from the old region is copied over,
+ * if the pointer is not null. The old pointer isn't cleaned up because we're
+ * using a simple linear allocator that doesn't care about reclaiming space.
+ * 
+ * @param   pointer The pointer to reallocate.
+ * @param   new_size    The number of bytes to allocate to the pointer.
+ * @return  A pointer to the newly allocated memory (or null if out of memory).
+ */
 static void*
 reallocate(const void* pointer, const size_t new_size)
 {
@@ -281,6 +293,26 @@ typedef struct plt_token_s {
         #undef _
     } type;
 } plt_token;
+
+/**
+ * Returns the string representation of the token type.
+ * 
+ * @param token_type    The type of the token.
+ * @return  A string representation of the token type.
+ */
+const char*
+plt_token_type_to_string(enum plt_token_type token_type)
+{
+    switch (token_type)
+    {
+        #define _(T) case PLT_TOKEN_ ## T: return #T;
+        TOKEN_TYPES
+        #undef _
+
+        default:
+            return "UNDEFINED";
+    }
+}
 
 /**
  * Retrieves the next token from the source code provided.
