@@ -1,4 +1,4 @@
-# This is the Windows test script
+# This is the Windows build script for Pilot Scheme unit tests.
 
 if (-not (Test-Path .\bin)) {
     md .\bin | Out-Null
