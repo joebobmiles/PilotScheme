@@ -29,7 +29,7 @@ UTEST(basic, first_token_invalid_for_empty_input)
         "",
         0);
 
-    EXPECT_EQ(PLT_TOKEN_INVALID, token.type);
+    EXPECT_EQ(PLT_TOKEN_EOF, token.type);
 
     free(memory_pool);
 }
