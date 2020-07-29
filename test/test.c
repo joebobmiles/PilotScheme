@@ -159,4 +159,36 @@ UTEST(lexing, correctly_identifies_consecutive_tokens)
     free(memory_pool);
 }
 
+UTEST(lexing, separates_two_whitespace_adjacent_numbers)
+{
+    const size_t memory_pool_size = 1024;
+    void* memory_pool = malloc(memory_pool_size);
+    memset(memory_pool, 0, memory_pool_size);
+
+    plt_init(memory_pool, memory_pool_size);
+
+    const char* source = "1 2";
+    const size_t source_length = strlen(source);
+
+    plt_lexer lexer = { 0 };
+
+    // Extract first number
+    plt_token number1 = plt_next_token(
+        &lexer,
+        source,
+        source_length);
+
+    EXPECT_EQ(PLT_TOKEN_NUMBER, number1.type);
+
+    // Extract second number
+    plt_token number2 = plt_next_token(
+        &lexer,
+        source,
+        source_length);
+
+    EXPECT_EQ(PLT_TOKEN_NUMBER, number2.type);
+
+    free(memory_pool);
+}
+
 UTEST_MAIN()
