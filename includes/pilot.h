@@ -362,6 +362,7 @@ plt_next_token(
             case '\t':
             case '\r':
             case '\n':
+                lexer->cursor_offset++;
                 break;
 
             case '(':
