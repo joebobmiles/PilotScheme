@@ -339,21 +339,21 @@ plt_next_token(
     while (lexer->cursor_offset < source_length)
     {
         #define peek() \
-            (lexer->cursor_offset < source_length) \
+            ((lexer->cursor_offset < source_length) \
             ? source[lexer->cursor_offset] \
-            : '\0'
+            : '\0')
 
         #define peek_next() \
-            (lexer->cursor_offset < source_length) \
+            ((lexer->cursor_offset < source_length) \
             ? source[lexer->cursor_offset + 1] \
-            : '\0'
+            : '\0')
 
         #define advance() \
-            (lexer->cursor_offset < source_length) \
+            ((lexer->cursor_offset < source_length) \
             ? buffer_append( \
                 lexer->buffer, \
                 source[lexer->cursor_offset++]) \
-            : 0
+            : 0)
 
         switch (peek())
         {
