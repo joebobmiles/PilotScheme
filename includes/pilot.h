@@ -284,7 +284,8 @@ typedef struct plt_token_s {
         _(LIST_END) \
         _(QUOTE) \
         _(NUMBER) \
-        _(IDENT)
+        _(IDENT) \
+        _(EOF)
 
     // The type of token.
     enum plt_token_type {
@@ -452,6 +453,14 @@ plt_next_token(
         #undef peek_next
         #undef advance
     }
+
+    // Since all paths (except whitespace, which only breaks the switch) goto
+    // cleanup, we know that whatever executes here can only execute if the
+    // while loop condition (lexer->cursor_offset < source_length) is false.
+    // When that condition is false, we have reached EOF, so we handle that
+    // scenario here.
+
+    t.type = PLT_TOKEN_EOF;
 
     cleanup:
     buffer_reset(lexer->buffer);
