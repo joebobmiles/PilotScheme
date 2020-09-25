@@ -3,6 +3,19 @@
 #include "stdlib.h"
 #include "string.h"
 
+// NOTE: Small hack to get the test code to stop throwing warnings.
+// I forgot that the values passed to this macro are size_t, which changes
+// depending on architecture. Unlike my tower, which uses 64-bit Intel, my
+// shiny new PineBook uses a 64-bit ARM processor.
+#ifdef __aarch64__
+#define PLT_OUT_OF_MEMORY(demanded_size, given_size) \
+    printf( \
+        "Insufficient memory!\n" \
+        "Required:\t%ld bytes\n" \
+        "Given:\t%ld bytes\n", \
+        demanded_size, \
+        given_size)
+#else
 #define PLT_OUT_OF_MEMORY(demanded_size, given_size) \
     printf( \
         "Insufficient memory!\n" \
@@ -10,6 +23,7 @@
         "Given:\t%lld bytes\n", \
         demanded_size, \
         given_size)
+#endif
 
 #include "pilot.h"
 
