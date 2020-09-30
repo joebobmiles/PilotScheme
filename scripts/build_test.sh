@@ -5,8 +5,7 @@ mkdir -p ./bin
 pushd ./bin > /dev/null
 
 clang -g \
-	--std=c99 \
-	-Wformat \
+	-std=c11 \
 	-I ../includes \
 	-o ./test \
 	../test/test.c
