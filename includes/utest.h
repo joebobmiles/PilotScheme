@@ -101,6 +101,9 @@ typedef uint64_t utest_uint64_t;
 #include <sys/syscall.h>
 #include <unistd.h>
 #endif
+#else // Other libc implementations
+#include <time.h>
+#define UTEST_USE_CLOCKGETTIME
 #endif
 
 #elif defined(__APPLE__)
@@ -196,13 +199,19 @@ static UTEST_INLINE utest_int64_t utest_ns(void) {
   QueryPerformanceFrequency(&frequency);
   return UTEST_CAST(utest_int64_t,
                     (counter.QuadPart * 1000000000) / frequency.QuadPart);
+#elif defined(__linux) && defined(__STRICT_ANSI__)
+  return UTEST_CAST(utest_int64_t, clock()) * 1000000000 / CLOCKS_PER_SEC;
 #elif defined(__linux)
   struct timespec ts;
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+  timespec_get(&ts, TIME_UTC);
+#else
   const clockid_t cid = CLOCK_REALTIME;
 #if defined(UTEST_USE_CLOCKGETTIME)
   clock_gettime(cid, &ts);
 #else
   syscall(SYS_clock_gettime, cid, &ts);
+#endif
 #endif
   return UTEST_CAST(utest_int64_t, ts.tv_sec) * 1000 * 1000 * 1000 + ts.tv_nsec;
 #elif __APPLE__
@@ -345,7 +354,11 @@ utest_type_printer(long long unsigned int i) {
 #endif
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #define utest_type_printer(val)                                                \
-  UTEST_PRINTF(_Generic((val), int                                             \
+  UTEST_PRINTF(_Generic((val), signed char                                     \
+                        : "%d", unsigned char                                  \
+                        : "%u", short                                          \
+                        : "%d", unsigned short                                 \
+                        : "%u", int                                            \
                         : "%d", long                                           \
                         : "%ld", long long                                     \
                         : "%lld", unsigned                                     \
